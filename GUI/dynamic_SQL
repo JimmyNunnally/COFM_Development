@@ -1,0 +1,46 @@
+import psycopg2
+
+def create_select_statement(table_name, columns, condition_column=None, condition_value=None):
+    """
+    Creates a SQL SELECT statement based on user input.
+    
+    Args:
+        table_name (str): Name of the table to query.
+        columns (list): List of column names to select.
+        condition_column (str, optional): Name of the column to use as a filter condition.
+        condition_value (str, optional): Value to use as a filter condition.
+    
+    Returns:
+        str: The SQL SELECT statement.
+    """
+    # Connect to the database
+    conn = psycopg2.connect(
+        host="your_host",
+        database="your_database",
+        user="your_username",
+        password="your_password"
+    )
+
+    # Open a cursor to perform database operations
+    cur = conn.cursor()
+
+    # Build the SELECT statement
+    column_names = ", ".join(columns)
+    select_query = f"SELECT {column_names} FROM {table_name}"
+    if condition_column and condition_value:
+        select_query += f" WHERE {condition_column} = %s"
+
+    # Execute the SELECT statement
+    if condition_column and condition_value:
+        cur.execute(select_query, (condition_value,))
+    else:
+        cur.execute(select_query)
+
+    # Fetch the results
+    results = cur.fetchall()
+
+    # Close the cursor and database connection
+    cur.close()
+    conn.close()
+
+    return results
